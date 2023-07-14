@@ -13,7 +13,7 @@ class App(customtkinter.CTk):
         customtkinter.set_default_color_theme("green")
 
         # Pfad zum Icon innerhalb der ausführbaren Datei
-        icon_path = pkg_resources.resource_filename(__name__, "time.ico")
+        icon_path = pkg_resources.resource_filename(__name__, "assets/time.ico")
 
         # Setzen des Fenstericons
         self.iconbitmap(icon_path)
@@ -28,7 +28,7 @@ class App(customtkinter.CTk):
         self.date_label.pack(padx=20, pady=10)
 
         # Button erstellen
-        self.fix_position_button = customtkinter.CTkButton(self, text="Fenster fixieren", command=self.fix_position)
+        self.fix_position_button = customtkinter.CTkButton(self, text="Fix window", command=self.fix_position)
         self.fix_position_button.pack(pady=10)
 
         self.window_fixed = False
@@ -49,13 +49,13 @@ class App(customtkinter.CTk):
             self.attributes("-toolwindow", False)
             self.overrideredirect(False)
             self.attributes("-alpha", 1.0)
-            self.fix_position_button.configure(text="Fenster fixieren")
+            self.fix_position_button.configure(text="Fix Window")
         else:
             self.attributes("-topmost", True)
             self.attributes("-toolwindow", True)
             self.overrideredirect(True)
             self.attributes("-alpha", 0.8)
-            self.fix_position_button.configure(text="Löslösen")
+            self.fix_position_button.configure(text="Detach")
 
         self.window_fixed = not self.window_fixed
 
