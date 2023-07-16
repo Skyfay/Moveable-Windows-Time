@@ -1,6 +1,8 @@
 import customtkinter
 import time
 import pkg_resources
+import json
+import os
 from PIL import Image, ImageTk
 
 
@@ -10,7 +12,7 @@ class Settings(customtkinter.CTkToplevel):
         self.attributes("-topmost", True) # set the window always on top
 
         # Gui
-        self.title("Delete Shortcut") # Windows titel
+        self.title("Settings") # Windows titel
         self.minsize(300, 250) # minimum size from the window length, height
         self.geometry("300x300") # startup size from the window
         #window.iconbitmap("assets/icon/ethernet.ico") # set the icon from the window
@@ -20,10 +22,45 @@ class Settings(customtkinter.CTkToplevel):
         self.grid_rowconfigure(4, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.description_label = customtkinter.CTkLabel(self, text="Settings")
-        self.description_label.grid(row=1, column=0, padx=20, pady=5)
+        self.transparency_label = customtkinter.CTkLabel(self, text="Set the transparency from the window")
+        self.transparency_label.grid(row=1, column=0, padx=20, pady=5)
+
+        self.transparency_slider = customtkinter.CTkSlider(self, from_=0.1, to=1.0, number_of_steps=9, orientation="horizontal", hover=bool, command=self.save_transparency_value)
+        self.transparency_slider.grid(row=2, column=0, padx=20, pady=5)
+        self.load_transparency_value()
 
 
+    def save_transparency_value(self, value):
+        transparency_value = float(value)
+
+        # Speichern des Werts in einer JSON-Datei
+        output_dir = os.path.join(os.environ['LOCALAPPDATA'], 'Skyfay', 'MoveableWindowsTime')
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, 'settings.json')
+
+        data = {
+            'transparency_value': transparency_value
+        }
+
+        with open(output_file, 'w') as f:
+            json.dump(data, f)
+
+    def load_transparency_value(self):
+        # Laden des Werts aus der JSON-Datei
+        output_dir = os.path.join(os.environ['LOCALAPPDATA'], 'Skyfay', 'MoveableWindowsTime')
+        output_file = os.path.join(output_dir, 'settings.json')
+
+        if os.path.exists(output_file):
+            with open(output_file, 'r') as f:
+                data = json.load(f)
+                transparency_value = data.get('transparency_value', 0.0)
+
+                # Setzen des Werts im Schieberegler
+                self.transparency_slider.set(transparency_value)
+        else:
+            # Wenn die JSON-Datei nicht existiert, den Standardwert verwenden
+            default_value = 0.1
+            self.transparency_slider.set(default_value)
 
 class App(customtkinter.CTk):
     def __init__(self):
@@ -72,6 +109,15 @@ class App(customtkinter.CTk):
         self.after(1000, self.update_clock)
 
     def fix_position(self):
+        # Laden des Werts aus der JSON-Datei
+        output_dir = os.path.join(os.environ['LOCALAPPDATA'], 'Skyfay', 'MoveableWindowsTime')
+        output_file = os.path.join(output_dir, 'settings.json')
+
+        if os.path.exists(output_file):
+            with open(output_file, 'r') as f:
+                data = json.load(f)
+                transparency_value = data.get('transparency_value', 0.0)
+
         if self.window_fixed:
             self.attributes("-topmost", False)
             self.attributes("-toolwindow", False)
@@ -85,7 +131,7 @@ class App(customtkinter.CTk):
             self.attributes("-topmost", True)
             self.attributes("-toolwindow", True)
             self.overrideredirect(True)
-            self.attributes("-alpha", 0.8)
+            self.attributes("-alpha", transparency_value)
             self.fix_position_button.configure(text="Detach")
             self.fix_position_button.pack(side="bottom")
             self.settings_button.pack_forget()
