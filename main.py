@@ -4,6 +4,27 @@ import pkg_resources
 from PIL import Image, ImageTk
 
 
+class Settings(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attributes("-topmost", True) # set the window always on top
+
+        # Gui
+        self.title("Delete Shortcut") # Windows titel
+        self.minsize(300, 250) # minimum size from the window length, height
+        self.geometry("300x300") # startup size from the window
+        #window.iconbitmap("assets/icon/ethernet.ico") # set the icon from the window
+        #customtkinter.set_default_color_theme("blue") # set default color theme
+
+        # set main grid layout 1x2
+        self.grid_rowconfigure(4, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.description_label = customtkinter.CTkLabel(self, text="Settings")
+        self.description_label.grid(row=1, column=0, padx=20, pady=5)
+
+
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -31,15 +52,17 @@ class App(customtkinter.CTk):
         self.date_label = customtkinter.CTkLabel(self, font=("Arial", 15), fg_color="#4d5056", corner_radius=10)
         self.date_label.pack(padx=20, pady=10)
 
-        self.settings_button = customtkinter.CTkButton(self, text="Fix window", command=self.fix_position)
-        self.settings_button.pack(side="right", padx=10, pady=10)
+        self.fix_position_button = customtkinter.CTkButton(self, text="Fix window", command=self.fix_position)
+        self.fix_position_button.pack(side="right", padx=10, pady=10)
 
-        self.fix_position_button = customtkinter.CTkButton(self, text="", image=self.settings_image)
-        self.fix_position_button.pack(side="left", padx=10, pady=10)
+        self.settings_button = customtkinter.CTkButton(self, text="", image=self.settings_image, command=self.open_settings_window)
+        self.settings_button.pack(side="left", padx=10, pady=10)
 
         self.window_fixed = False
 
         self.update_clock()
+
+        self.toplevel_window = None
 
     def update_clock(self):
         current_time = time.strftime("%H:%M:%S")
@@ -54,20 +77,26 @@ class App(customtkinter.CTk):
             self.attributes("-toolwindow", False)
             self.overrideredirect(False)
             self.attributes("-alpha", 1.0)
-            self.settings_button.configure(text="Fix Window")
-            self.settings_button.pack(side="right")
-            self.fix_position_button.pack(side="right", padx=10, pady=10) # add the button again
+            self.fix_position_button.configure(text="Fix Window")
+            self.fix_position_button.pack(side="right")
+            self.settings_button.pack(side="right", padx=10, pady=10) # add the button again
 
         else:
             self.attributes("-topmost", True)
             self.attributes("-toolwindow", True)
             self.overrideredirect(True)
             self.attributes("-alpha", 0.8)
-            self.settings_button.configure(text="Detach")
-            self.settings_button.pack(side="bottom")
-            self.fix_position_button.pack_forget()
+            self.fix_position_button.configure(text="Detach")
+            self.fix_position_button.pack(side="bottom")
+            self.settings_button.pack_forget()
 
         self.window_fixed = not self.window_fixed
+
+    def open_settings_window(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+           self.toplevel_window = Settings(self)  # create window if its None or destroyed
+        else:
+            self.toplevel_window.focus()  # if window exists focus it
 
 
 if __name__ == "__main__":
