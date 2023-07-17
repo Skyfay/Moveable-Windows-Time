@@ -13,7 +13,7 @@ repo_owner = "Skyfay"
 repo_name = "Moveable-Windows-Time"
 
 # Aktuelle Version des Programms
-current_version = "1.1.0"
+current_version = "1.2.0"
 
 def check_for_updates(self):
     # GitHub API-Endpunkt für Releases
