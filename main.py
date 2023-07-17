@@ -4,7 +4,24 @@ import pkg_resources
 import json
 import os
 from PIL import Image, ImageTk
+from tkinter import colorchooser
 from version import check_for_updates
+
+# Global functions
+def create_default_settings_file(file_path):
+    if not os.path.exists(file_path):
+        default_settings = {
+            'transparency_value': 0.8,
+            'font_color': '#fff'
+        }
+        with open(file_path, 'w') as f:
+            json.dump(default_settings, f)
+
+# Pfad zur settings.json-Datei
+output_dir = os.path.join(os.environ['LOCALAPPDATA'], 'Skyfay', 'MoveableWindowsTime')
+output_file = os.path.join(output_dir, 'settings.json')
+
+create_default_settings_file(output_file)
 
 class Settings(customtkinter.CTkToplevel):
     def __init__(self, app, *args, **kwargs):
@@ -23,7 +40,7 @@ class Settings(customtkinter.CTkToplevel):
         #customtkinter.set_default_color_theme("blue") # set default color theme
 
         # set main grid layout 1x2
-        self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(5, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
         self.transparency_label = customtkinter.CTkLabel(self, text="Set the transparency from the window")
@@ -32,6 +49,32 @@ class Settings(customtkinter.CTkToplevel):
         self.transparency_slider = customtkinter.CTkSlider(self, from_=0.1, to=1.0, number_of_steps=9, orientation="horizontal", hover=bool, command=self.save_transparency_value)
         self.transparency_slider.grid(row=2, column=0, padx=20, pady=5)
         self.load_transparency_value()
+
+        self.color_picker_label = customtkinter.CTkLabel(self, text="Select your time color")
+        self.color_picker_label.grid(row=3, column=0, padx=20, pady=5)
+
+        self.color_picker_button = customtkinter.CTkButton(self, text="Select color", command=self.pick_color)
+        self.color_picker_button.grid(row=4, column=0, padx=20, pady=5)
+
+    def pick_color(self):
+        color = colorchooser.askcolor()
+        if color:
+            selected_color = color[1]  # Get the selected color value (hex code)
+            print(selected_color)
+            # Speichern des Werts in einer JSON-Datei
+            output_dir = os.path.join(os.environ['LOCALAPPDATA'], 'Skyfay', 'MoveableWindowsTime')
+            os.makedirs(output_dir, exist_ok=True)
+            output_file = os.path.join(output_dir, 'settings.json')
+
+            data = {
+                'transparency_value': self.transparency_slider.get(),
+                'font_color': selected_color
+            }
+
+            with open(output_file, 'w') as f:
+                json.dump(data, f)
+
+            self.app.time_label.configure(text_color=selected_color)
 
 
     def save_transparency_value(self, value):
@@ -70,9 +113,30 @@ class Settings(customtkinter.CTkToplevel):
             transparency_value = 0.8
             self.transparency_slider.set(transparency_value)
 
+
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+
+
+        # Laden des Werts aus der JSON-Datei
+        output_dir = os.path.join(os.environ['LOCALAPPDATA'], 'Skyfay', 'MoveableWindowsTime')
+        output_file = os.path.join(output_dir, 'settings.json')
+
+        if os.path.exists(output_file):
+            with open(output_file, 'r') as f:
+                data = json.load(f)
+                font_color = data.get('font_color', '#fff')  # Default font color if not found in the file
+        else:
+            data = {
+                'transparency_value': 0.8,  # Default transparency value
+                'font_color': '#fff'  # Default font color
+            }
+            os.makedirs(output_dir, exist_ok=True)
+            with open(output_file, 'w') as f:
+                json.dump(data, f)
+
 
         self.title("")
         self.configure(bg="#2b2d30")
@@ -99,6 +163,9 @@ class App(customtkinter.CTk):
 
         self.date_label = customtkinter.CTkLabel(self, font=("Arial", 15), fg_color="#4d5056", corner_radius=10)
         self.date_label.pack(padx=20, pady=10)
+
+        # Verwenden des font_color-Werts
+        self.time_label.configure(text_color=font_color)
 
         self.fix_position_button = customtkinter.CTkButton(self, text="Fix window", command=self.fix_position)
         self.fix_position_button.pack(side="right", padx=10, pady=10)
@@ -155,6 +222,7 @@ class App(customtkinter.CTk):
             self.settings_button.pack_forget()
 
         self.window_fixed = not self.window_fixed
+
 
     def open_settings_window(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
