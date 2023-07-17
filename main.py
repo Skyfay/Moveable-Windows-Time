@@ -6,12 +6,10 @@ import os
 from PIL import Image, ImageTk
 from version import check_for_updates
 
-
-
-
 class Settings(customtkinter.CTkToplevel):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.app = app
 
         check_for_updates(self)
 
@@ -83,6 +81,7 @@ class App(customtkinter.CTk):
         self.maxsize(250, 200)  # Maximale Größe des Fensters (Länge, Höhe)
         self.geometry("225x175")  # startup size from the window
         customtkinter.set_default_color_theme("green")
+
 
         # icon
         icon_path = pkg_resources.resource_filename(__name__, "assets/time.ico")
@@ -162,12 +161,6 @@ class App(customtkinter.CTk):
            self.toplevel_window = Settings(self)  # create window if its None or destroyed
         else:
             self.toplevel_window.focus()  # if window exists focus it
-
-    def close_window(self):
-        self.destroy()
-
-    def update_completed(self):
-        self.close_window()
 
 if __name__ == "__main__":
     app = App()

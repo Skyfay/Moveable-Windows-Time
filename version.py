@@ -97,9 +97,7 @@ def download_and_install(self):
             return
 
             # Fehlermeldung anzeigen
-            self.update_error_label = customtkinter.CTkLabel(self,
-                                                               text="Error occurred during the process.",
-                                                               fg_color="#a13f48")
+            self.update_error_label = customtkinter.CTkLabel(self, text="Error occurred during the process.", fg_color="#a13f48")
             self.update_error_label.grid(row=6, column=0, padx=20, pady=20, sticky="s")
             # Nach 3 Sekunden Fehlermeldung entfernen und Download-Button anzeigen
             self.after(3000, lambda: show_download_button(self))
@@ -134,8 +132,7 @@ def download_and_install(self):
 
             # Beenden des Programms
             self.destroy()
-            # Aufrufen der Callback-Funktion, um das App-Fenster zu schließen
-            update_completed.value = True
+            self.app.destroy()
 
         else:
             print("Current executable file not found.")
