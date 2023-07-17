@@ -13,7 +13,7 @@ repo_owner = "Skyfay"
 repo_name = "Moveable-Windows-Time"
 
 # Aktuelle Version des Programms
-current_version = "0.1.0"
+current_version = "1.1.0"
 
 def check_for_updates(self):
     # GitHub API-Endpunkt für Releases
@@ -32,7 +32,7 @@ def check_for_updates(self):
         if latest_version > current_version:
             # Es gibt eine neuere Version verfügbar
             self.update_button = customtkinter.CTkButton(self, hover_color="#8f3840",
-                                                           corner_radius=5, width=200, height=50, fg_color="#a13f48",
+                                                           corner_radius=5, width=200, height=25, fg_color="#a13f48",
                                                            border_spacing=10, text=("A new version " + latest_version + " is available"),
                                                            command=lambda: download_and_install(self))
             self.update_button.grid(row=6, column=0, padx=20, pady=20, sticky="s")
@@ -117,7 +117,7 @@ def download_and_install(self):
         # Ermitteln des Versionsnamens
         latest_version = release_info["tag_name"]
         # Herunterladen der ausführbaren Datei in den Download-Ordner des Benutzers
-        download_path = Path.home() / "Downloads" / f"time_{latest_version}.exe"
+        download_path = Path.home() / "Downloads" / f"Moveable-Windows-Time_{latest_version}.exe"
         print("Downloading the latest version...")
         urllib.request.urlretrieve(download_url, download_path)
 
