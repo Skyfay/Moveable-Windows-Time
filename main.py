@@ -4,11 +4,17 @@ import pkg_resources
 import json
 import os
 from PIL import Image, ImageTk
+from version import check_for_updates
+
+
 
 
 class Settings(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        check_for_updates(self)
+
         self.attributes("-topmost", True) # set the window always on top
 
         # Gui
@@ -58,9 +64,13 @@ class Settings(customtkinter.CTkToplevel):
                 # Setzen des Werts im Schieberegler
                 self.transparency_slider.set(transparency_value)
         else:
-            # Wenn die JSON-Datei nicht existiert, den Standardwert verwenden
-            default_value = 0.1
-            self.transparency_slider.set(default_value)
+            data = {'transparency_value': 0.8}
+            os.makedirs(output_dir, exist_ok=True)
+            with open(output_file, 'w') as f:
+                json.dump(data, f)
+
+            transparency_value = 0.8
+            self.transparency_slider.set(transparency_value)
 
 class App(customtkinter.CTk):
     def __init__(self):
@@ -70,8 +80,13 @@ class App(customtkinter.CTk):
         self.configure(bg="#2b2d30")
         self.configure(background="#2b2d30")
         self.minsize(225, 175)  # minimum size from the window length, height
+        self.maxsize(250, 200)  # Maximale Größe des Fensters (Länge, Höhe)
         self.geometry("225x175")  # startup size from the window
         customtkinter.set_default_color_theme("green")
+
+        # icon
+        icon_path = pkg_resources.resource_filename(__name__, "assets/time.ico")
+        self.iconbitmap(icon_path)
 
         # images
         settings_image = pkg_resources.resource_filename(__name__, "assets/settings_light.png")
@@ -79,9 +94,6 @@ class App(customtkinter.CTk):
         settings_image = Image.open(settings_image)
         self.settings_image = customtkinter.CTkImage(settings_image, size=(20, 20))
 
-        # icon
-        icon_path = pkg_resources.resource_filename(__name__, "assets/time.ico")
-        self.iconbitmap(icon_path)
 
         self.time_label = customtkinter.CTkLabel(self, font=("Arial", 40))
         self.time_label.pack(padx=20, pady=10)
@@ -117,6 +129,13 @@ class App(customtkinter.CTk):
             with open(output_file, 'r') as f:
                 data = json.load(f)
                 transparency_value = data.get('transparency_value', 0.0)
+        else:
+            data = {'transparency_value': 0.8}
+            os.makedirs(output_dir, exist_ok=True)
+            with open(output_file, 'w') as f:
+                json.dump(data, f)
+
+            transparency_value = 0.8
 
         if self.window_fixed:
             self.attributes("-topmost", False)
@@ -144,6 +163,11 @@ class App(customtkinter.CTk):
         else:
             self.toplevel_window.focus()  # if window exists focus it
 
+    def close_window(self):
+        self.destroy()
+
+    def update_completed(self):
+        self.close_window()
 
 if __name__ == "__main__":
     app = App()
